@@ -93,24 +93,32 @@ public class ImageController {
     //The method first needs to convert the list of all the tags to a string containing all the tags separated by a comma and then add this string in a Model type object
     //This string is then displayed by 'edit.html' file as previous tags of an image
     @RequestMapping(value = "/editImage")
-    public String editImage(@RequestParam("imageId") Integer imageId, Model model) {
+    public String editImage(@RequestParam("imageId") Integer imageId, Model model,HttpSession session) {
         Image image = imageService.getImage(imageId);
 
-        String tags = convertTagsToString(image.getTags());
-        model.addAttribute("image", image);
-        model.addAttribute("tags", tags);
-        return "images/edit";
+        User user = (User) session.getAttribute("loggeduser");
+
+
+
+        if(user.getUsername().equals(image.getUser().getUsername())){
+            String tags = convertTagsToString(image.getTags());
+            model.addAttribute("image", image);
+            model.addAttribute("tags", tags);
+            return "images/edit";
+        }
+
+        else{
+           // model.addAttribute("comments",image.getComments());
+            model.addAttribute("image", image);
+            model.addAttribute("tags", image.getTags());
+            model.addAttribute("editError","Only the owner of the image can edit the image");
+            return "/images/image";
+        }
     }
 
     //This controller method is called when the request pattern is of type 'images/edit' and also the incoming request is of PUT type
     //The method receives the imageFile, imageId, updated image, along with the Http Session
     //The method adds the new imageFile to the updated image if user updates the imageFile and adds the previous imageFile to the new updated image if user does not choose to update the imageFile
-    //Set an id of the new updated image
-    //Set the user using Http Session
-    //Set the date on which the image is posted
-    //Call the updateImage() method in the business logic to update the image
-    //Direct to the same page showing the details of that particular updated image
-
     //The method also receives tags parameter which is a string of all the tags separated by a comma using the annotation @RequestParam
     //The method converts the string to a list of all the tags using findOrCreateTags() method and sets the tags attribute of an image as a list of all the tags
     @RequestMapping(value = "/editImage", method = RequestMethod.PUT)
@@ -133,7 +141,7 @@ public class ImageController {
         updatedImage.setDate(new Date());
 
         imageService.updateImage(updatedImage);
-        return "redirect:/images/" + updatedImage.getTitle();
+        return "redirect:/images/" + updatedImage.getId()+"/"+updatedImage.getTitle();
     }
 
 
@@ -141,11 +149,21 @@ public class ImageController {
     //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
     @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
-    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId) {
-        imageService.deleteImage(imageId);
-        return "redirect:/images";
-    }
+    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId,Model model,HttpSession session) {
 
+        User user = (User) session.getAttribute("loggeduser");
+        Image image = imageService.getImage(imageId);
+        if (user.getUsername().equals(image.getUser().getUsername())) {
+            imageService.deleteImage(imageId);
+            return "redirect:/images";
+        } else {
+            model.addAttribute("image", image);
+            model.addAttribute("tags", image.getTags());
+            // model.addAttribute("comments", image.getComments());
+            model.addAttribute("deleteError", "Only the owner of the image can delete the image");
+            return "/images/image";
+        }
+    }
 
     //This method converts the image to Base64 format
     private String convertUploadedFileToBase64(MultipartFile file) throws IOException {

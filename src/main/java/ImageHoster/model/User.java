@@ -25,6 +25,9 @@ public class User {
     @Column(name = "password")
     private String password;
 
+
+
+
     //The 'users' table is mapped to 'user_profile' table with One:One mapping
     //cascade = CascadeType.ALL specifies that if a record in 'user_profile' table is deleted or updated, then all the records in 'users' table associated to that particular record in 'user_profile' table will be deleted or updated  first and then the record in the 'user_profile' table will be deleted or updated
     //FetchType is EAGER
