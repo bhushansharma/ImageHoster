@@ -128,8 +128,9 @@ public class ImageController {
         String updatedImageData = convertUploadedFileToBase64(file);
         List<Tag> imageTags = findOrCreateTags(tags);
 
-        if (updatedImageData.isEmpty())
+        if (updatedImageData.isEmpty()) {
             updatedImage.setImageFile(image.getImageFile());
+        }
         else {
             updatedImage.setImageFile(updatedImageData);
         }
@@ -156,7 +157,8 @@ public class ImageController {
         if (user.getUsername().equals(image.getUser().getUsername())) {
             imageService.deleteImage(imageId);
             return "redirect:/images";
-        } else {
+        }
+        else {
             model.addAttribute("image", image);
             model.addAttribute("tags", image.getTags());
             model.addAttribute("comments", image.getComments());

@@ -59,7 +59,6 @@ public class UserController {
             return "users/login";
         }
         else{
-
             model.addAttribute("User", user);
             model.addAttribute("passwordTypeError","Password must contain atleast 1 alphabet, 1 number & 1 special character");
             return "/users/registration";
@@ -82,7 +81,8 @@ public class UserController {
         if (existingUser != null) {
             session.setAttribute("loggeduser", existingUser);
             return "redirect:/images";
-        } else {
+        }
+        else {
             return "users/login";
         }
     }
@@ -95,7 +95,6 @@ public class UserController {
     @RequestMapping(value = "users/logout", method = RequestMethod.POST)
     public String logout(Model model, HttpSession session) {
         session.invalidate();
-
         List<Image> images = imageService.getAllImages();
         model.addAttribute("images", images);
         return "index";
